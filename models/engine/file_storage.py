@@ -38,8 +38,8 @@ class FileStorage:
                 if class_name == value.__class__.__name__:
                     # If it does, add the key-value pair to the new dictionary.
                     objects_of_class[key] = value
-                # Return the new dictionary containing objects of the specified class.
-                return objects_of_class
+            # Return the new dictionary containing objects of the specified class.
+            return objects_of_class
 
     def new(self, obj):
         """
