@@ -1,33 +1,35 @@
 #!/usr/bin/python3
 """This module defines a class User"""
-from models.base_model import BaseModel, Base
+from models.base_model import BaseModel
+from models.base_model import Base
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
-from uuid import uuid4
-import os
+from os import getenv
+
+st = getenv("HBNB_TYPE_STORAGE")
 
 
 class User(BaseModel, Base):
     """This class defines a user by various attributes"""
-    __tablename__ = 'user'
-
-    def __init__(self, *args, **kwargs):
-        """Initialization"""
-        super().__init__(*args, **kwargs)
-        setattr(self, "id", str(uuid4()))
-        for i, j in kwargs.items():
-            setattr(self, i, j)
-
-    if os.getenv('HBNB_TYPE_STORAGE') == 'db':
-        __tablename__ = 'users'
+    
+    __tablename__ = "users"
+    
+    if st == "db":
         email = Column(String(128), nullable=False)
         password = Column(String(128), nullable=False)
         first_name = Column(String(128), nullable=True)
         last_name = Column(String(128), nullable=True)
-        places = relationship("Place", backref="user", cascade="all, delete")
-        reviews = relationship("Review", backref="user", cascade="all, delete")
+        
+        places = relationship(
+            "Place",
+            cascade="all,delete, delete-orphan, merge, save-update",
+            back_populates="user",
+        )
+        
+        reviews = relationship("Review", back_populates="user")
+    
     else:
-        email = ''
-        password = ''
-        first_name = ''
-        last_name = ''
+        email = ""
+        password = ""
+        first_name = ""
+        last_name = ""

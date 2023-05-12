@@ -1,48 +1,34 @@
 #!/usr/bin/python3
-""" Test delete feature
-"""
-from models.engine.file_storage import FileStorage
-from models.state import State
+""" State Module for HBNB project """
+from models.base_model import Base, BaseModel
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import relationship
+from models.city import City
+from os import getenv
 
-fs = FileStorage()
 
-# All States
-all_states = fs.all(State)
-print("All States: {}".format(len(all_states.keys())))
-for state_key in all_states.keys():
-    print(all_states[state_key])
+class State(BaseModel, Base):
+    """ State class """
+    
+    __tablename__ = "states"
+    
+    if getenv("HBNB_TYPE_STORAGE") == "db":
+        name = Column(String(128), nullable=False)
+        
+        cities = relationship(
+            "City", cascade="all, delete, delete-orphan",
+            back_populates="state")
+    else:
+        name = ""
+        
+        @property
+        def cities(self):
+            """getter method for the FileStorage class"""
+            
+            from models import storage
+            city_list = []
+            for city in list(storage.all(City).values()):
+                if city.state_id == self.id:
+                    city_list.append(city)
+            return city_list
 
-# Create a new State
-new_state = State()
-new_state.name = "California"
-fs.new(new_state)
-fs.save()
-print("New State: {}".format(new_state))
-
-# All States
-all_states = fs.all(State)
-print("All States: {}".format(len(all_states.keys())))
-for state_key in all_states.keys():
-    print(all_states[state_key])
-
-# Create another State
-another_state = State()
-another_state.name = "Nevada"
-fs.new(another_state)
-fs.save()
-print("Another State: {}".format(another_state))
-
-# All States
-all_states = fs.all(State)
-print("All States: {}".format(len(all_states.keys())))
-for state_key in all_states.keys():
-    print(all_states[state_key])
-
-# Delete the new State
-fs.delete(new_state)
-
-# All States
-all_states = fs.all(State)
-print("All States: {}".format(len(all_states.keys())))
-for state_key in all_states.keys():
-    print(all_states[state_key])
